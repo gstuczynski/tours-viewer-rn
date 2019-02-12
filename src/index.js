@@ -1,88 +1,44 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  WebView,
-  Modal,
-  TouchableHighlight
-} from "react-native";
+import { StyleSheet, Text, View, WebView, Modal } from "react-native";
 import { Card, Button } from "react-native-elements";
 import { connect } from "react-redux";
+import axios from "react-native-axios";
 import Deck from "./Deck";
 import * as actionTypes from "./reducers/actionTypes";
 import propTypes from "./propTypes";
 
-const DATA = [
-  {
-    id: 1,
-    title: "Card #1",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-04.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 2,
-    title: "Card #2",
-    img: "http://www.fluxdigital.co/wp-content/uploads/2015/04/Unsplash.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 3,
-    title: "Card #3",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-09.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 4,
-    title: "Card #4",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-01.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 5,
-    title: "Card #5",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-04.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/"
-  },
-  {
-    id: 6,
-    title: "Card #6",
-    img: "http://www.fluxdigital.co/wp-content/uploads/2015/04/Unsplash.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 7,
-    title: "Card #7",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-09.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  },
-  {
-    id: 8,
-    title: "Card #8",
-    img: "http://imgs.abduzeedo.com/files/paul0v2/unsplash/unsplash-01.jpg",
-    url: "https://gstuczynski.pl/tour/plaszow/",
-    info: "sadsasdadsadasdasdsadsadsa"
-  }
-];
+const SERVER_URL = "https://gstuczynski.pl";
 
 class App extends React.Component {
   static propTypes = propTypes;
 
   constructor(props) {
     super(props);
-    this.props.setCurrentItem(DATA[0]);
-    this.state = { modalVisible: false };
+    this.state = {
+      modalVisible: false,
+      cardsData: []
+    };
   }
 
-  onButtonPress = url => {
-    console.log(url);
-  };
+  componentDidMount() {
+    this.getItems();
+  }
+
+  getItems() {
+    axios
+      .get(`${SERVER_URL}/api-360/all-images`)
+      .then(res => res.data)
+      .then(res =>
+        res.map((img, idx) => ({
+          id: idx,
+          title: "test",
+          img: `${SERVER_URL}/images360/${img}`,
+          url: `${SERVER_URL}/tour/images360-server/?img=${img}`,
+          info: "test"
+        }))
+      )
+      .then(res => this.setState({ cardsData: res }));
+  }
 
   setModalVisible(visible) {
     this.setState({ modalVisible: visible });
@@ -90,7 +46,7 @@ class App extends React.Component {
 
   renderCard(item, onClick) {
     return (
-      <Card key={item.id} title={item.title} image={{ img: item.img }}>
+      <Card key={item.id} title={item.title} image={{ uri: item.img }}>
         <Text style={{ marginBottom: 10 }}>
           I can customize the Card further.
         </Text>
@@ -139,7 +95,9 @@ class App extends React.Component {
     return (
       <View style={styles.container}>
         {!this.props.isViewerOpen ? (
-          <Deck data={DATA} renderCard={this.renderCard} />
+          <View>
+            <Deck data={this.state.cardsData} renderCard={this.renderCard} />
+          </View>
         ) : (
           <View style={styles.container}>
             {this.renderModal()}

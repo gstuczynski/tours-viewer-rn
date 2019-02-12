@@ -25,7 +25,6 @@ class Deck extends Component {
 
   constructor(props) {
     super(props);
-
     const position = new Animated.ValueXY();
     const panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -48,7 +47,7 @@ class Deck extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.data !== this.props.data) {
-      this.setState({ index: 0 });
+      this.setState({ index: 0, data: nextProps.data });
     }
   }
 
